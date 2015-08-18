@@ -7,25 +7,23 @@
 LiquidCrystal screen(12, 11, 5, 4, 3, 2);
 Servo lock;
 
-SoftwareSerial BT(10,9); //BT(RX pin on Arduino, TX pin on Arduino)
+SoftwareSerial BT(9,10); //BT(RX pin on Arduino, TX pin on Arduino)
 
 #define temperaturePin A0
 #define piezoPin 7
 #define lockPin 6
 #define lockButtonPin 10
 
-bool lockState = false;
-bool lockCommand = false;
+bool lockState = true;
 float temperature = 25.;
 float temperatureReading = 0;
-String inComingMessage;
+char inComingMessage;
 
 void setup() {
   BT.begin(9600);
-  BT.println("Hello from Safe Night");
   screen.begin(16, 2);
   lock.attach(lockPin);
-  lock.write(0);
+  lock.write(90);
   screen.noCursor();
   screen.noBlink();
   pinMode(13, OUTPUT);
@@ -49,42 +47,34 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (BT.available()) {
-      inComingString =(String)BT.read();
-      if (inComingString == "1")
-        lockCommand = true;
-      else if (inComingString == "0"){
-        lockCommand = false;
+      inComingMessage =BT.read();
+      if (inComingMessage == '1' && lockState == false){
+        lock.write(90);
+        lockState = true;
+      }
+      else if (inComingMessage == '0' && lockState == true){
+        lock.write(0);
+        lockState == false;
+      }
+      else if (inComingMessage == '1' && lockState == true){
+        lockState = true;
+        lock.write(90);
       }
       else{
-        BT.println("Please enter a 1 to lock, or a 0 to unlock");
+        lockState = false;
+        lock.write(0);
       }
+      Serial.println(lockState);
    
   }
    //temperatureReading = analogRead(temperaturePin);
 //temperature = temperatureReading/9.31; 
-  if (lockState == false && lockCommand == true)
-  {
-    lock.write(90);
-    lockState = true;
-  }
-  else if (lockState == true && lockCommand == false)
-  {
-    lock.write(0);
-    lockState = false;
-  }
-  else if (lockState == true && lockCommand == true)
-  {
-    lockState = true;
-  }
-  else
-  {
-    lockState = false;
-  }
+
  
    screen.home();
    screen.print("Status:");
    screen.print("  ");
-   if (lockState == false){
+   if (lockState == true){
     screen.setCursor(7,0);
     screen.print("  ");
     screen.setCursor(9,0);
@@ -93,6 +83,8 @@ void loop() {
    else{
     screen.setCursor(7,0);
     screen.print("Un");
+    screen.setCursor(9,0);
+    screen.print("l");
    }
    screen.setCursor(0,1);
    screen.print("Temperature");
@@ -110,6 +102,3 @@ void loop() {
    screen.print("C");
 
 }
-
-
-
