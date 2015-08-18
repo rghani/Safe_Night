@@ -6,7 +6,9 @@
 
 LiquidCrystal screen(12, 11, 5, 4, 3, 2);
 Servo lock;
-SoftwareSerial BT(10,9);
+
+SoftwareSerial BT(10,9); //BT(RX pin on Arduino, TX pin on Arduino)
+
 #define temperaturePin A0
 #define piezoPin 7
 #define lockPin 6
@@ -16,7 +18,7 @@ bool lockState = false;
 bool lockCommand = false;
 float temperature = 25.;
 float temperatureReading = 0;
-char inComingChar;
+String inComingMessage;
 
 void setup() {
   BT.begin(9600);
@@ -47,10 +49,10 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (BT.available()) {
-      inComingChar = (BT.read());
-      if (inComingChar == '1')
+      inComingString =(String)BT.read();
+      if (inComingString == "1")
         lockCommand = true;
-      else if (inComingChar == '0'){
+      else if (inComingString == "0"){
         lockCommand = false;
       }
       else{
@@ -72,7 +74,7 @@ void loop() {
   }
   else if (lockState == true && lockCommand == true)
   {
-    lockState = false;
+    lockState = true;
   }
   else
   {
