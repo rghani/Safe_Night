@@ -22,6 +22,7 @@ void setup() {
   //Establish bluetooth serial connection
   BT.begin(9600);
   
+  
   //Set up LCD
   screen.begin(16, 2);
   
@@ -34,6 +35,12 @@ void setup() {
   pinMode(13, OUTPUT);
   pinMode(piezoPin, OUTPUT);
   pinMode(temperaturePin, INPUT);
+  
+  do{
+   screen.print("not listening")  
+  } while (!BT.isListening());
+  BT.listen();
+  
   String welcome = "Welcome to Safe Night";
   screen.clear();
   screen.home();
@@ -50,8 +57,8 @@ void setup() {
 }
 
 void loop() {
-  // check if Bluetooth serial communication is available
-  if (BT.available()) {
+  // check if Bluetooth serial communication
+  if (BT.available() > 0) {
       //reads Bluetooth message from paired deivce
       inComingMessage =BT.read();
       delay(200);
@@ -66,13 +73,12 @@ void loop() {
         lockState == false;
       }
       else if (inComingMessage == '1' && lockState == true){ //sending a 1 when locked will lock device
-        lockState = true;
-        lock.write(90);
+        delay(200);
+      }
+      else if (inComingMessage == -1){ //case when BT.read() returns -1 when no character recieved on the RX pin is available
         delay(200);
       }
       else{
-        lockState = false; // sending a 0 when unlocked will unlock device
-        lock.write(0);
         delay(200);
       }
    
