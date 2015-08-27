@@ -54,21 +54,26 @@ void loop() {
   if (BT.available()) {
       //reads Bluetooth message from paired deivce
       inComingMessage =BT.read();
+      delay(200);
       if (inComingMessage == '1' && lockState == false){ //sending a 1 when unlocked will lock device
         lock.write(90);
+        delay(200);
         lockState = true;
       }
       else if (inComingMessage == '0' && lockState == true){ //sending a 0 when locked will unlock device
         lock.write(0);
+        delay(200);
         lockState == false;
       }
       else if (inComingMessage == '1' && lockState == true){ //sending a 1 when locked will lock device
         lockState = true;
         lock.write(90);
+        delay(200);
       }
       else{
         lockState = false; // sending a 0 when unlocked will unlock device
         lock.write(0);
+        delay(200);
       }
    
   }
